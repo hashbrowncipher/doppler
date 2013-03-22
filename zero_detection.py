@@ -5,8 +5,10 @@ from pipe_util import split_fileinput
 from pipe_util import join_output
 from world_params import CHANNEL_COUNT
 from world_params import SAMPLE_RATE_HERTZ
+from alignment import ALIGN_INPUT_FORMAT
 
 
+ZERO_DETECTION_INPUT_FORMAT = 'f' * CHANNEL_COUNT
 def zero_detection(sample_stream):
 	"""Make events for 0-crossings.
 
@@ -26,5 +28,7 @@ def zero_detection(sample_stream):
 
 
 if __name__ == '__main__':
-	for channel_event_t in zero_detection(split_fileinput([float] * CHANNEL_COUNT)):
-		join_output(channel_event_t)
+	# Input is a double per channel
+	for channel, event_time_seconds in zero_detection(split_fileinput(ZERO_DETECTION_INPUT_FORMAT)):
+		# Channel id is a short, time is a double
+		join_output(ALIGN_INPUT_FORMAT, channel, event_time_seconds)

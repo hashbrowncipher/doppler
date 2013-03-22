@@ -4,8 +4,6 @@ from numpy import array
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
-from pipe_util import unpack_fileinput
-from pipe_util import pack_output
 from world_params import CHANNEL_COUNT
 from world_params import SPEED_OF_SOUND_METERS_SECOND
 from world_params import MAX_MIC_DELAY_SECONDS
@@ -42,7 +40,7 @@ def times_to_time_distances(times_seconds):
 	return key_time_seconds, distances_meters
 
 
-ALIGN_INPUT_FORMAT = 'h' + 'f' * CHANNEL_COUNT
+ALIGN_INPUT_FORMAT = 'h' + 'f'
 def align(channel__event_time_seconds_stream, allow_dropped_events=True):
 	"""Each microphone should see the same number of peaks arriving in the
 	same order (unless the dart is faster than sound!). So have some queues of
@@ -86,5 +84,5 @@ def align(channel__event_time_seconds_stream, allow_dropped_events=True):
 
 
 if __name__ == '__main__':
-	for time_seconds, aligned_distances_meters in align(split_fileinput((int, float))):
-		pack_output(MULTILATERATE_INPUT_FORMAT, time_seconds, *aligned_distances_meters)
+	for time_seconds, aligned_distances in align(split_fileinput(ALIGN_INPUT_FORMAT)):
+		join_output(MULTILATERATE_INPUT_FORMAT, time_seconds, *aligned_distances)
