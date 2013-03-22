@@ -30,27 +30,33 @@ mic_dart_distances = array([euclidean(mic, fake_dart) for mic in mics])
 mic_dart_distances += random.normal(0.0, 0.1, mic_dart_distances.shape)
 
 
-def multilateration(mic_positions, mic_dart_distances):
-	"""
-	mic_positions is a N x 3 ndarray of coordinates of each mic
-	mic_dart_distances is a 1 x N ndarray of distances from dart to each mic
+def transpose_1D(M):
+	"""numpy is silly and won't let you transpose a N x 1 ndarray to a 1 x N
+	ndarray."""
+	return M.reshape(len(M), 1)
+
+
+def multilaterate(mic_positions, mic_dart_distances_stream):
+	"""Take a stream of mic - dart distances and yield coordinates.
+
+	mic_positions must be a a N x 3 array of coordinates of each mic.
+	mic_dart_distances must be a generator of 1 x N array of arbitrary offset
+		distances from dart to each mic.
 	"""
 	mic_positions = array(mic_positions)
-	mic_dart_distances = array(mic_dart_distances)
-
 	origin = mic_positions[0]
-	mic_positions = mic_positions - origin
+	mic_positions -= origin
 
-	vt = mic_dart_distances - mic_dart_distances[0]
+	for mic_dart_distances in mic_dart_distances_stream:
+		mic_dart_distances = array(mic_dart_distances)
 
-	A = 2.0 * mic_positions[:, 0] / vt - 2.0 * mic_positions[1, 0] / vt[1]
-	B = 2.0 * mic_positions[:, 1] / vt - 2.0 * mic_positions[1, 1] / vt[1]
-	C = 2.0 * mic_positions[:, 2] / vt - 2.0 * mic_positions[1, 2] / vt[1]
-	D = vt - vt[1] - sum(mic_positions ** 2, axis=1) / vt + sum(mic_positions[1] ** 2) / vt[1]
+		vt = mic_dart_distances[2:] - mic_dart_distances[0]
 
-	def fix(M):
-		return M.reshape(len(M), 1)
+		A = 2.0 * mic_positions[2:, 0] / vt - 2.0 * mic_positions[1, 0] / vt[1]
+		B = 2.0 * mic_positions[2:, 1] / vt - 2.0 * mic_positions[1, 1] / vt[1]
+		C = 2.0 * mic_positions[2:, 2] / vt - 2.0 * mic_positions[1, 2] / vt[1]
+		D = vt - vt[1] - sum(mic_positions[2:, :] ** 2, axis=1) / vt + sum(mic_positions[1] ** 2) / vt[1]
 
-	M = concatenate([fix(A), fix(B), fix(C)], axis=1)
+		M = concatenate([transpose_1D(A), transpose_1D(B), transpose_1D(C)], axis=1)
 
-	return pinv(M[2:, :]).dot(-fix(D[2:])) + fix(origin)
+		yield pinv(M).dot(-transpose_1D(D)).reshape(3) + origin
