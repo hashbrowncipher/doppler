@@ -48,8 +48,8 @@ def index_from_freq(freq):
 def fft(signal):
     return scipy.fft(signal).tolist()
 
-def spectrum(signal):
-    return [x * numpy.conj(x) for x in fft(signal)]
+def get_spectrum(signal):
+    return [(x * numpy.conj(x)).real for x in fft(signal)]
 
 
 ########################################
@@ -100,24 +100,34 @@ def ranges_from_series(freqs, precision):
 # dart finding
 ########################################
 
-def find_peak_in(signal, low_freq, high_freq):
+def find_peak_in(spectrum, low_freq, high_freq):
+    """ returns highest frequency of the spectrum in the range given"""
     low = index_from_freq(low_freq)
     high = index_from_freq(high_freq)
     maxp = 0
     ind = 0
-    for i, p in enumerate(spectrum(signal)[low:high]):
+    for i, p in enumerate(spectrum[low:high]):
         if p > maxp:
             maxp = p
             ind = i
     return freq_from_index(low + ind)
 
 def make_mask_for_signal(signal, low_freq, high_freq, precision=0.05):
-    base = find_peak_in(signal, low_freq, high_freq)
+    base = find_peak_in(get_spectrum(signal), low_freq, high_freq)
     ranges = ranges_from_series(
             harmonic_series(base, 10),
             precision
         )
     return prepare_multi_band_filter(ranges)
+
+def is_there_a_dart(signal, low=1900, high=2700):
+    spectrum = get_spectrum(signal)
+    average_energy = sum(spectrum) / len(spectrum)
+    peak = find_peak_in(spectrum, low, high)
+    if spectrum[index_from_freq(peak)] / average_energy > 3:
+        return peak
+    else:
+        return 0
 
 
 ########################################
@@ -133,46 +143,40 @@ def make_signal(freq, harmonic_pattern):
 harmonic_pattern = [(10 - i) / 10. for i in range(10)]
 signal = make_signal(1900, harmonic_pattern)
 
-noisy = add_noise(signal)
 
 def plot(signal, sig_graph, fft_graph):
     sig_graph.plot(signal[:BUFFER_SIZE/4])
-    fft_graph.plot(spectrum(signal)[:BUFFER_SIZE/2])
+    fft_graph.plot(get_spectrum(signal)[:BUFFER_SIZE/2])
 
 def draw_all():
     fig = plt.figure()
-    grid = 420
+    grid = 320
     sig_graph = fig.add_subplot(grid + 1)
     fft_graph = fig.add_subplot(grid + 2)
     noisy_graph = fig.add_subplot(grid + 3)
     noisyfft_graph = fig.add_subplot(grid + 4)
-    filtered_graph = fig.add_subplot(grid + 5)
-    filteredfft_graph = fig.add_subplot(grid + 6)
-    multifiltered_graph = fig.add_subplot(grid + 7)
-    multifilteredfft_graph = fig.add_subplot(grid + 8)
-    noisy = add_noise(signal, 0.5)
+    multifiltered_graph = fig.add_subplot(grid + 5)
+    multifilteredfft_graph = fig.add_subplot(grid + 6)
+    #filtered_graph = fig.add_subplot(grid + 5)
+    #filteredfft_graph = fig.add_subplot(grid + 6)
+    noisy = add_noise(signal, 0.4)
     filtered = violent_multi_band_pass(noisy, prepare_multi_band_filter([(1500, 2500)]))
-    mask = make_mask_for_signal(noisy, 1500, 3000, 0.05)
+    mask = make_mask_for_signal(noisy, 1000, 2500, 0.05)
     multifiltered = violent_multi_band_pass(noisy, mask)
     plot(signal, sig_graph, fft_graph)
     plot(noisy, noisy_graph, noisyfft_graph)
-    plot(filtered, filtered_graph, filteredfft_graph)
+    #plot(filtered, filtered_graph, filteredfft_graph)
     plot(multifiltered, multifiltered_graph, multifilteredfft_graph)
     plt.show()
 
 
-# f = scipy.fft(noisy)[:BUFFER_SIZE/2]
-
-# plt.plot(noisy)
-# plt.show()
-# plt.plot(f)
-# plt.show()
-
-# max_index, max_value = max(enumerate(f), key=lambda x:x[1]
-#         if freq_from_index(x[0])>200 else 0)
-
-
-# print "Freq:", freq_from_index(max_index)
+def draw_signal(signal):
+    fig = plt.figure()
+    grid = 210
+    sig_graph = fig.add_subplot(grid + 1)
+    fft_graph = fig.add_subplot(grid + 2)
+    plot(signal, sig_graph, fft_graph)
+    plt.show()
 
 
 if __name__ == '__main__':
