@@ -45,6 +45,10 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 		time = time__mic_dart_distances[0]
 		mic_dart_distances = array(time__mic_dart_distances[1:])
 
+		# The algorithm fails on any 0 - m distance degeneracies. Add some wiggle if so.
+		while any(mic_dart_distances[1:] == mic_dart_distances[0]):
+			mic_dart_distances[1:] += 1.0e-12
+
 		vt = mic_dart_distances - mic_dart_distances[0]
 		free_vt = vt[2:]
 
@@ -54,6 +58,7 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 		D = free_vt - vt[1] - sum(mic_positions[2:, :] ** 2, axis=1) / free_vt + sum(mic_positions[1] ** 2) / vt[1]
 
 		M = concatenate([transpose_1D(A), transpose_1D(B), transpose_1D(C)], axis=1)
+
 		yield time, pinv(M).dot(-transpose_1D(D)).reshape(3) + origin
 
 
