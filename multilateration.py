@@ -1,5 +1,6 @@
 from itertools import combinations
 from operator import itemgetter
+import sys
 
 from numpy import array
 from numpy import random
@@ -7,6 +8,7 @@ from numpy import concatenate
 from numpy import sum
 from numpy import mean
 from numpy.linalg.linalg import pinv
+from numpy.linalg.linalg import LinAlgError
 from scipy.spatial.distance import euclidean
 from scipy.spatial.distance import cdist
 from scipy.spatial.distance import pdist
@@ -59,7 +61,10 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 
 		M = concatenate([transpose_1D(A), transpose_1D(B), transpose_1D(C)], axis=1)
 
-		yield time, pinv(M).dot(-transpose_1D(D)).reshape(3) + origin
+		try:
+			yield time, pinv(M).dot(-transpose_1D(D)).reshape(3) + origin
+		except LinAlgError:
+			sys.stderr.write('Could not multilaterate at t = %f\n' % time)
 
 
 if __name__ == '__main__':
