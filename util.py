@@ -178,4 +178,4 @@ def draw_all():
 if __name__ == '__main__':
     for timestep, value in enumerate(sine(DART_FREQ_HERTZ, 10000)):
 		# one double per channel
-        join_output('d' * CHANNELS, [value] * CHANNELS)
+        join_output('%dd' % CHANNELS, [value] * CHANNELS)
