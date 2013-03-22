@@ -11,7 +11,7 @@ def align(events):
 	Events must be a generator of (channel int, time float).
 	Yields 8-tuples of time floats.
 	"""
-	queues = tuple([deque()] * CHANNELS)
+	queues = tuple(deque() for i in range(CHANNELS))
 
 	for channel, event_t in events:
 		# In on the right.
