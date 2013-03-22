@@ -4,13 +4,17 @@ import math
 import matplotlib.pyplot as plt
 import random
 
-BUFFER_SIZE = 2048
-SAMPLE_RATE = 48000
+from pipe_util import join_output
+from world_params import CHANNELS
+from world_params import SAMPLE_RATE_HERTZ
+from world_params import DART_FREQ_HERTZ
 
 
-def sine(freq, offset=0):
-    return [math.sin(offset + i * 2 * math.pi * freq / SAMPLE_RATE)
-            for i in range(BUFFER_SIZE)]
+BUFFER_SIZE = 512
+
+def sine(freq, length):
+    for i in range(length):
+        yield math.sin(i * 2 * math.pi * freq / SAMPLE_RATE_HERTZ)
 
 def add_signals(s1, s2, r=1):
     return [s1[i] + r * s2[i] for i in range(len(s1))]
@@ -32,7 +36,11 @@ def add_noise(signal, noise_ratio=0.4):
 
 def freq_from_index(index):
     """ returns the frequency associated to the index in the fft"""
-    return index * SAMPLE_RATE / BUFFER_SIZE
+    return index * SAMPLE_RATE_HERTZ / BUFFER_SIZE
+
+
+# signal = sine(freq)
+# noisy = add_noise(signal)
 
 def index_from_freq(freq):
     return int(freq * BUFFER_SIZE / SAMPLE_RATE)
@@ -152,3 +160,20 @@ def draw_all():
     plt.show()
 
 
+# f = scipy.fft(noisy)[:BUFFER_SIZE/2]
+
+# plt.plot(noisy)
+# plt.show()
+# plt.plot(f)
+# plt.show()
+
+# max_index, max_value = max(enumerate(f), key=lambda x:x[1]
+#         if freq_from_index(x[0])>200 else 0)
+
+
+# print "Freq:", freq_from_index(max_index)
+
+
+if __name__ == '__main__':
+    for timestep, value in enumerate(sine(DART_FREQ_HERTZ, 10000)):
+        join_output([value] * CHANNELS)
