@@ -1,9 +1,12 @@
 from collections import deque
 
+from numpy import array
+
 from pipe_util import split_fileinput
 from pipe_util import join_output
+from world_params import CHANNELS
+from world_params import SPEED_OF_SOUND_METERS_SECOND
 
-CHANNELS = 8
 
 def align(event_stream):
 	"""Assume that every microphone will see every peak. Then each microphone
@@ -12,7 +15,7 @@ def align(event_stream):
 	then ouput the times of the same event arriving at every mic.
 
 	event_stream must be a generator of (channel int, time float).
-	Yields 8-tuples of time floats.
+	Yields time + 8-tuples of distances.
 	"""
 	queues = tuple(deque() for i in range(CHANNELS))
 
@@ -29,4 +32,5 @@ def align(event_stream):
 
 if __name__ == '__main__':
 	for aligned_times in align(split_fileinput((int, float))):
-		join_output(aligned_times)
+		aligned_distances = array(aligned_times) * SPEED_OF_SOUND_METERS_SECOND
+		join_output([aligned_times[0]] + list(aligned_distances))
