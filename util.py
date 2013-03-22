@@ -4,10 +4,9 @@ import math
 import matplotlib.pyplot as plt
 import random
 
-BUFFER_SIZE = 512
+BUFFER_SIZE = 2048
 SAMPLE_RATE = 48000
 
-freq = 2000
 
 def sine(freq, offset=0):
     return [math.sin(offset + i * 2 * math.pi * freq / SAMPLE_RATE)
@@ -39,51 +38,117 @@ def index_from_freq(freq):
     return int(freq * BUFFER_SIZE / SAMPLE_RATE)
 
 def fft(signal):
-    return scipy.fft(signal).real.tolist()
+    return scipy.fft(signal).tolist()
 
-def violent_band_pass(signal, f1, f2):
-    i1 = index_from_freq(f1)
-    i2 = index_from_freq(f2)
+def spectrum(signal):
+    return [x * numpy.conj(x) for x in fft(signal)]
 
+
+########################################
+# filters
+########################################
+
+def prepare_multi_band_filter(freq_ranges, size=BUFFER_SIZE):
+    mask = [0] * size
+    for (low, high) in freq_ranges:
+        low = index_from_freq(low)
+        high = index_from_freq(high)
+        mask = mask[:low] + [1] * (high - low) + mask[high:]
+    return mask
+
+def violent_multi_band_pass(signal, mask):
+    """ A filter that lets you define a bunch of bands:
+    everything outside of these frequency ranges gets mercylessly filtered"""
+    assert(len(signal) == len(mask))
     f = fft(signal)
-    filtered = ([0] * i1) + f[i1:i2] + ([0] * (BUFFER_SIZE - i2))
+    filtered = [mask[i] * f[i] for i in range(len(signal))]
     return scipy.ifft(filtered).real.tolist()
 
-def draw_signal(signal):
-    fig = plt.figure()
-    sig_graph = fig.add_subplot(211)
-    fft_graph = fig.add_subplot(212)
-    sig_graph.plot(signal)
-    fft_graph.plot(fft(signal))
-    plt.show()
+def violent_band_pass(signal, low_freq, high_freq):
+    low = index_from_freq(low_freq)
+    high = index_from_freq(high_freq)
+    return violent_multi_band_pass(signal,
+            [0] * low + [1] * (high - low) + [0] * (BUFFER_SIZE - high)
+        )
 
-signal = sine(freq)
+
+########################################
+# harmonics
+########################################
+
+def harmonic_series(freq, n):
+    return [freq * i for i in range(1, n+1)]
+
+def ranges_from_series(freqs, precision):
+   # factor = 1 + precision
+   # return [(f / factor, f * factor) for f in freqs]
+    tolerance = freqs[0] * precision
+    return [(f - tolerance, f + tolerance) for f in freqs]
+
+
+
+########################################
+# dart finding
+########################################
+
+def find_peak_in(signal, low_freq, high_freq):
+    low = index_from_freq(low_freq)
+    high = index_from_freq(high_freq)
+    maxp = 0
+    ind = 0
+    for i, p in enumerate(spectrum(signal)[low:high]):
+        if p > maxp:
+            maxp = p
+            ind = i
+    return freq_from_index(low + ind)
+
+def make_mask_for_signal(signal, low_freq, high_freq, precision=0.05):
+    base = find_peak_in(signal, low_freq, high_freq)
+    ranges = ranges_from_series(
+            harmonic_series(base, 10),
+            precision
+        )
+    return prepare_multi_band_filter(ranges)
+
+
+########################################
+# test data
+########################################
+
+def make_signal(freq, harmonic_pattern):
+    signal = [0] * BUFFER_SIZE
+    for i, ratio in enumerate(harmonic_pattern):
+        signal = add_signals(signal, sine((i + 1) * freq), ratio)
+    return signal
+
+harmonic_pattern = [(10 - i) / 10. for i in range(10)]
+signal = make_signal(1900, harmonic_pattern)
 
 noisy = add_noise(signal)
 
 def plot(signal, sig_graph, fft_graph):
-    sig_graph.plot(signal)
-    fft_graph.plot(fft(signal))
+    sig_graph.plot(signal[:BUFFER_SIZE/4])
+    fft_graph.plot(spectrum(signal)[:BUFFER_SIZE/2])
 
 def draw_all():
     fig = plt.figure()
-    sig_graph = fig.add_subplot(321)
-    fft_graph = fig.add_subplot(322)
-    noisy_graph = fig.add_subplot(323)
-    noisyfft_graph = fig.add_subplot(324)
-    filtered_graph = fig.add_subplot(325)
-    filteredfft_graph = fig.add_subplot(326)
-    signal = sine(2000)
-    noisy = add_noise(signal)
-    filtered = violent_band_pass(noisy, 1500, 2500)
+    grid = 420
+    sig_graph = fig.add_subplot(grid + 1)
+    fft_graph = fig.add_subplot(grid + 2)
+    noisy_graph = fig.add_subplot(grid + 3)
+    noisyfft_graph = fig.add_subplot(grid + 4)
+    filtered_graph = fig.add_subplot(grid + 5)
+    filteredfft_graph = fig.add_subplot(grid + 6)
+    multifiltered_graph = fig.add_subplot(grid + 7)
+    multifilteredfft_graph = fig.add_subplot(grid + 8)
+    noisy = add_noise(signal, 0.5)
+    filtered = violent_multi_band_pass(noisy, prepare_multi_band_filter([(1500, 2500)]))
+    mask = make_mask_for_signal(noisy, 1500, 3000, 0.05)
+    multifiltered = violent_multi_band_pass(noisy, mask)
     plot(signal, sig_graph, fft_graph)
     plot(noisy, noisy_graph, noisyfft_graph)
     plot(filtered, filtered_graph, filteredfft_graph)
+    plot(multifiltered, multifiltered_graph, multifilteredfft_graph)
     plt.show()
 
 
-max_index, max_value = max(enumerate(fft(noisy)), key=lambda x:x[1]
-        if freq_from_index(x[0])>200 else 0)
-
-
-print "Freq:", freq_from_index(max_index)
