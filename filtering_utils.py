@@ -121,14 +121,25 @@ def make_mask_for_signal(signal, low_freq, high_freq, precision=0.05):
         )
     return prepare_multi_band_filter(ranges)
 
-def is_there_a_dart(signal, low=1900, high=2700):
-    spectrum = get_spectrum(signal)
+def is_there_a_dart(spectrum, low=1900, high=2700):
     average_energy = sum(spectrum) / len(spectrum)
     peak = find_peak_in(spectrum, low, high)
-    if spectrum[index_from_freq(peak)] / average_energy > 3:
+    if spectrum[index_from_freq(peak)] / average_energy > 2:
         return peak
     else:
         return 0
+
+PRECISION = 0.05
+FACTOR = 1 + PRECISION
+def process(signal, low, high):
+    spectrum = get_spectrum(signal)
+    peak = is_there_a_dart(spectrum, low, high)
+
+    filtered = [0] * BUFFER_SIZE
+    for i in range(index_from_freq(peak / FACTOR),index_from_freq(peak * FACTOR)):
+        filtered[i] = spectrum[i]
+    return scipy.ifft(filtered).real.tolist()
+
 
 
 ########################################

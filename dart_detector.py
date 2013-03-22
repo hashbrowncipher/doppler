@@ -13,26 +13,34 @@ HIGH_FREQ = 2800
 N_MIC = 2
 # buffers initially 0
 
-windows = [[0] * BUFFER_SIZE] * N_MIC
+input_buffers = [[]] * N_MIC
+output_buffers = [[]] * N_MIC
+
+
+def fresh_buffers(full_buffers):
+    for i, buf in enumerate(input_buffers):
+        input_buffers[i] = buf[BUFFER_SIZE/2:]
 
 def filter_dart(line):
-    # The input is 8 channels of 2-byte (unsigned short) signals.
-    unpacked_samples = line
-
-    # drop oldest sample
-    for w in windows:
-        w = w[1:]
 
     # append newest sample
-    for i, sample in enumerate(unpacked_samples):
-        windows[i].append(sample)
+    for i, sample in enumerate(line):
+        input_buffers[i].append(sample)
 
+    if len(input_buffers[0]) == BUFFER_SIZE:
+        for i in range(N_MIC):
+            output_buffers[i] = filtering_utils.process(
+                    input_buffers[i], LOW_FREQ, HIGH_FREQ)
+            fresh_buffers(input_buffers)
 
-    return filtering_utils.is_there_a_dart(windows[0], LOW_FREQ, HIGH_FREQ)
+    if output_buffers[0]:
+        output = [buf[len(input_buffers[0]) - (BUFFER_SIZE/4)]
+                for buf in output_buffers]
+        pipe_util.join_output("dd", output)
 
 if __name__ == '__main__':
     try:
         for line in pipe_util.split_fileinput('HH'):
-            print filter_dart(line)
+            filter_dart(line)
     except KeyboardInterrupt:
         pass
