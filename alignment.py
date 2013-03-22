@@ -1,3 +1,5 @@
+from collections import deque
+
 CHANNELS = 8
 
 def align(events):
@@ -6,14 +8,17 @@ def align(events):
 	dart is faster than sound). So have some queues of events from every mic,
 	then ouput the times of the same event arriving at every mic.
 
-	events must be a generator of (channel int, time float).
+	Events must be a generator of (channel int, time float).
+	Yields 8-tuples of time floats.
 	"""
-	queues = tuple([[]] * CHANNELS)
+	queues = tuple([deque()] * CHANNELS)
 
 	for channel, event_t in events:
-		queues[channel].push(event_t)
+		# In on the right.
+		queues[channel].append(event_t)
 
 		# If we've seen a peak on every channel,
 		if all(len(queue) > 0 for queue in queues):
 			# yield all those relative times.
-			yield tuple(queue.pop(0) for queue in queues)
+			# Out on the left.
+			yield tuple(queue.popleft() for queue in queues)
