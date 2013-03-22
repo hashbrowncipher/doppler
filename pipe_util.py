@@ -5,13 +5,32 @@ has information on the type_strings being used.
 import fileinput
 import struct
 
+# Set True to use struct and pass messages more efficiently; False
+# uses strings separated by spaces instead.
+USE_BINARY_PACKING = False
+
+# Extend this with more types if we need them, for now unsigned shorts
+# and doubles are all we're using.
+fmt_chars_to_types = {
+    'd': float,
+    'H': int,
+}
+
 
 def split_fileinput(fmt):
     """Yields tuples with the given types from fileinput."""
-    for line in fileinput.input():
-		yield struct.unpack(fmt, line[:-1])
+    if USE_BINARY_PACKING:
+        for line in fileinput.input():
+            yield struct.unpack(fmt, line)
+    else:
+        types = [fmt_chars_to_types[fmt_char] for fmt_char in fmt]
+        for line in fileinput.input():
+            yield list(in_type(x) for in_type, x in zip(types, line.split()))
 
 
 def join_output(fmt, *l):
-	"""Take a tuple for output and make a string for piping."""
-	print struct.pack(fmt, *l)
+    """Take a tuple for output and make a string for piping."""
+    if USE_BINARY_PACKING:
+        print struct.pack(fmt, *l)
+    else:
+        print ' '.join(str(item) for item in l)

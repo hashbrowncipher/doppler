@@ -1,4 +1,5 @@
 from numpy import signbit
+from numpy import array
 from numpy import logical_xor
 
 from pipe_util import split_fileinput
@@ -8,8 +9,8 @@ from world_params import SAMPLE_RATE_HERTZ
 from alignment import ALIGN_INPUT_FORMAT
 
 
-# Input is a float per channel
-ZERO_DETECTION_INPUT_FORMAT = 'f' * CHANNEL_COUNT
+# Input is a double per channel
+ZERO_DETECTION_INPUT_FORMAT = 'd' * CHANNEL_COUNT
 def zero_detection(sample_stream):
 	"""Make events for 0-crossings.
 
