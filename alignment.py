@@ -1,5 +1,8 @@
 from collections import deque
 
+from pipe_util import split_fileinput
+from pipe_util import join_output
+
 CHANNELS = 8
 
 def align(event_stream):
@@ -22,3 +25,8 @@ def align(event_stream):
 			# yield all those relative times.
 			# Out on the left.
 			yield tuple(queue.popleft() for queue in queues)
+
+
+if __name__ == '__main__':
+	for aligned_times in align(split_fileinput((int, float))):
+		join_output(aligned_times)
