@@ -16,6 +16,8 @@ from scipy.spatial.distance import squareform
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
+from pipe_util import unpack_fileinput
+from pipe_util import pack_output
 from world_params import CHANNEL_COUNT
 from world_params import MIC_COORDS_METERS
 
@@ -31,6 +33,7 @@ def transpose_1D(M):
 	return M.reshape(len(M), 1)
 
 
+MULTILATERATE_INPUT_FORMAT = 'f' + 'f' * CHANNEL_COUNT
 def multilaterate(mic_positions, time__mic_dart_distances_stream):
 	"""Take a stream of mic - dart distances and yield coordinates.
 
@@ -69,5 +72,5 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 
 
 if __name__ == '__main__':
-	for time, coordinates in multilaterate(MIC_COORDS_METERS, split_fileinput([float] + [float] * CHANNEL_COUNT)):
+	for time, coordinates in multilaterate(MIC_COORDS_METERS, unpack_fileinput(MULTILATERATE_INPUT_FORMAT)):
 		join_output([time] + list(coordinates))
