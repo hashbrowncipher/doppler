@@ -27,6 +27,6 @@ def generate_events(sample_stream):
 
 if __name__ == '__main__':
 	# Input is a double per channel
-	for channel_event_t in generate_events(split_fileinput('d' * CHANNELS)):
+	for channel_event_t in generate_events(split_fileinput('%dd' % CHANNELS)):
 		# Channel id is a short, time is a double
 		join_output('Hd', channel_event_t)

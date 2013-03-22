@@ -35,4 +35,4 @@ if __name__ == '__main__':
 	for aligned_times in align(split_fileinput('Hd')):
 		aligned_distances = array(aligned_times) * SPEED_OF_SOUND_METERS_SECOND
 		# One double for time, plus one double per channel
-		join_output('d' * (CHANNELS + 1), [aligned_times[0]] + list(aligned_distances))
+		join_output('%dd' % (CHANNELS + 1), [aligned_times[0]] + list(aligned_distances))
