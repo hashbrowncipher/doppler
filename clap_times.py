@@ -88,7 +88,8 @@ class TapTester(object):
 
     def tapDetected(self):
         # ID is first cmd line arg, then time.
-        print("%s %f"%(sys.argv[1], time.time()))
+        sys.stdout.write("%s %f\n"%(sys.argv[1], time.time()))
+        sys.stdout.flush()
 
     def listen(self):
         try:
