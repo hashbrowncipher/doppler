@@ -42,7 +42,7 @@ def split_fileinput(fmt):
             yield list(in_type(x) for in_type, x in zip(types, line.split()))
 
 
-def join_output(fmt, *l):
+def join_output(fmt, l):
     """Take a tuple for output and make a string for piping."""
     if USE_BINARY_PACKING:
         print struct.pack(fmt, *l)
