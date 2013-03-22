@@ -4,13 +4,17 @@ import math
 import matplotlib.pyplot as plt
 import random
 
-BUFFER_SIZE = 2048
-SAMPLE_RATE = 48000
+from pipe_util import join_output
+from world_params import CHANNELS
+from world_params import SAMPLE_RATE_HERTZ
+from world_params import DART_FREQ_HERTZ
 
 
-def sine(freq, offset=0):
-    return [math.sin(offset + i * 2 * math.pi * freq / SAMPLE_RATE)
-            for i in range(BUFFER_SIZE)]
+BUFFER_SIZE = 512
+
+def sine(freq, length):
+    for i in range(length):
+        yield math.sin(i * 2 * math.pi * freq / SAMPLE_RATE_HERTZ)
 
 def add_signals(s1, s2, r=1):
     return [s1[i] + r * s2[i] for i in range(len(s1))]
@@ -32,10 +36,14 @@ def add_noise(signal, noise_ratio=0.4):
 
 def freq_from_index(index):
     """ returns the frequency associated to the index in the fft"""
-    return index * SAMPLE_RATE / BUFFER_SIZE
+    return index * SAMPLE_RATE_HERTZ / BUFFER_SIZE
+
+
+# signal = sine(freq)
+# noisy = add_noise(signal)
 
 def index_from_freq(freq):
-    return int(freq * BUFFER_SIZE / SAMPLE_RATE)
+    return int(freq * BUFFER_SIZE / SAMPLE_RATE_HERTZ)
 
 def fft(signal):
     return scipy.fft(signal).tolist()
@@ -53,7 +61,8 @@ def prepare_multi_band_filter(freq_ranges, size=BUFFER_SIZE):
     for (low, high) in freq_ranges:
         low = index_from_freq(low)
         high = index_from_freq(high)
-        mask = mask[:low] + [1] * (high - low) + mask[high:]
+        for i in xrange(low-1, high):
+            mask[i] = 1
     return mask
 
 def violent_multi_band_pass(signal, mask):
@@ -168,3 +177,9 @@ def draw_signal(signal):
     fft_graph = fig.add_subplot(grid + 2)
     plot(signal, sig_graph, fft_graph)
     plt.show()
+
+
+if __name__ == '__main__':
+    for timestep, value in enumerate(sine(DART_FREQ_HERTZ, 10000)):
+		# one double per channel
+        join_output('d' * CHANNELS, [value] * CHANNELS)
