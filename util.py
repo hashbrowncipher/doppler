@@ -12,9 +12,9 @@ from world_params import DART_FREQ_HERTZ
 
 BUFFER_SIZE = 512
 
-def sine(freq, length):
-    for i in range(length):
-        yield math.sin(i * 2 * math.pi * freq / SAMPLE_RATE_HERTZ)
+def sine(freq, offset=0):
+    return [math.sin(offset + i * 2 * math.pi * freq / SAMPLE_RATE_HERTZ)
+            for i in range(BUFFER_SIZE)]
 
 def add_signals(s1, s2, r=1):
     return [s1[i] + r * s2[i] for i in range(len(s1))]
@@ -43,7 +43,7 @@ def freq_from_index(index):
 # noisy = add_noise(signal)
 
 def index_from_freq(freq):
-    return int(freq * BUFFER_SIZE / SAMPLE_RATE)
+    return int(freq * BUFFER_SIZE / SAMPLE_RATE_HERTZ)
 
 def fft(signal):
     return scipy.fft(signal).tolist()
@@ -175,5 +175,5 @@ def draw_all():
 
 
 if __name__ == '__main__':
-    for timestep, value in enumerate(sine(DART_FREQ_HERTZ, 10000)):
+    for timestep, value in enumerate(sine(DART_FREQ_HERTZ)):
         join_output([value] * CHANNELS)
