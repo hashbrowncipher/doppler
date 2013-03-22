@@ -10,10 +10,10 @@ from world_params import CHANNEL_COUNT
 
 # Input is a double per channel
 ZERO_DETECTION_INPUT_FORMAT = 'd' * CHANNEL_COUNT
-# Channel id is a short, timestep is a long
-ALIGN_INPUT_FORMAT = 'H' + 'L'
-# Input one long timestep and one double distance per channel
-MULTILATERATE_INPUT_FORMAT = 'L' + 'd' * CHANNEL_COUNT
+# Channel id is a short, double time in seconds
+ALIGN_INPUT_FORMAT = 'H' + 'd'
+# Input one double time in seconds and one double distance per channel
+MULTILATERATE_INPUT_FORMAT = 'd' + 'd' * CHANNEL_COUNT
 # Display is t, x, y, z all doubles
 DISPLAY_INPUT_FORMAT = 'dddd'
 

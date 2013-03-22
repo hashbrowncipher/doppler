@@ -46,10 +46,9 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 	origin = mic_positions[0]
 	mic_positions = mic_positions - origin
 
-	for timestep__mic_dart_distances in time__mic_dart_distances_stream:
-		timestep = timestep__mic_dart_distances[0]
-		time_seconds = float(timestep) / float(SAMPLE_RATE_HERTZ)
-		mic_dart_distances = array(timestep__mic_dart_distances[1:])
+	for time__mic_dart_distances in time__mic_dart_distances_stream:
+		time_seconds = time__mic_dart_distances[0]
+		mic_dart_distances = array(time__mic_dart_distances[1:])
 
 		# The algorithm fails on any 0 - m distance degeneracies. Add some
 		# wiggle if so.
