@@ -184,4 +184,4 @@ def draw_signal(signal):
 if __name__ == '__main__':
     for value in sine(DART_FREQ_HERTZ, 10000):
         values = [value] * CHANNEL_COUNT
-        join_output(ZERO_DETECTION_INPUT_FORMAT, *values)
+        join_output(ZERO_DETECTION_INPUT_FORMAT, values)
