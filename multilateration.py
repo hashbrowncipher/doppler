@@ -31,7 +31,8 @@ def transpose_1D(M):
 	return M.reshape(len(M), 1)
 
 
-MULTILATERATE_INPUT_FORMAT = 'f' + 'f' * CHANNEL_COUNT
+# Input one double time and one double distance per channel
+MULTILATERATE_INPUT_FORMAT = 'd' + 'd' * CHANNEL_COUNT
 def multilaterate(mic_positions, time__mic_dart_distances_stream):
 	"""Take a stream of mic - dart distances and yield coordinates.
 
@@ -69,8 +70,7 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 			sys.stderr.write('Could not multilaterate at t = %f\n' % time_seconds)
 
 
-DISPLAY_INPUT_FORMAT = 'ffff'
+DISPLAY_INPUT_FORMAT = 'dddd'
 if __name__ == '__main__':
 	for time_seconds, coordinates in multilaterate(MIC_COORDS_METERS, split_fileinput(MULTILATERATE_INPUT_FORMAT)):
-		# Output one double time and three double coordinates
 		join_output(DISPLAY_INPUT_FORMAT, time_seconds, *coordinates)

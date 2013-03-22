@@ -40,7 +40,8 @@ def times_to_time_distances(times_seconds):
 	return key_time_seconds, distances_meters
 
 
-ALIGN_INPUT_FORMAT = 'h' + 'f'
+# Channel id is a short, time is a double
+ALIGN_INPUT_FORMAT = 'H' + 'd'
 def align(channel__event_time_seconds_stream, allow_dropped_events=True):
 	"""Each microphone should see the same number of peaks arriving in the
 	same order (unless the dart is faster than sound!). So have some queues of

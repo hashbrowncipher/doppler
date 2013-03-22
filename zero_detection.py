@@ -8,6 +8,7 @@ from world_params import SAMPLE_RATE_HERTZ
 from alignment import ALIGN_INPUT_FORMAT
 
 
+# Input is a float per channel
 ZERO_DETECTION_INPUT_FORMAT = 'f' * CHANNEL_COUNT
 def zero_detection(sample_stream):
 	"""Make events for 0-crossings.
@@ -28,7 +29,5 @@ def zero_detection(sample_stream):
 
 
 if __name__ == '__main__':
-	# Input is a double per channel
 	for channel, event_time_seconds in zero_detection(split_fileinput(ZERO_DETECTION_INPUT_FORMAT)):
-		# Channel id is a short, time is a double
 		join_output(ALIGN_INPUT_FORMAT, channel, event_time_seconds)
