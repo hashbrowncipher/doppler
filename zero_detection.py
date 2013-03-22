@@ -7,7 +7,7 @@ from world_params import CHANNELS
 from world_params import SAMPLE_RATE_HERTZ
 
 
-def generate_events(sample_stream):
+def zero_detection(sample_stream):
 	"""Make events for 0-crossings.
 
 	sample_stream must be a generator of CHANNELS-tuples of values that
@@ -26,5 +26,5 @@ def generate_events(sample_stream):
 
 
 if __name__ == '__main__':
-	for channel_event_t in generate_events(split_fileinput([float] * CHANNELS)):
+	for channel_event_t in zero_detection(split_fileinput([float] * CHANNELS)):
 		join_output(channel_event_t)
