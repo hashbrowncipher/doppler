@@ -63,5 +63,5 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 
 
 if __name__ == '__main__':
-	for time_coordinates in multilaterate(MIC_COORDS, split_fileinput([float] + [float] * CHANNELS)):
-		join_output(time_coordinates)
+	for time, coordinates in multilaterate(MIC_COORDS, split_fileinput([float] + [float] * CHANNELS)):
+		join_output([time] + list(coordinates))
