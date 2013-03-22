@@ -127,5 +127,5 @@ if __name__ == "__main__":
 
     tt = TapTester()
 
-    for i in range(1000):
+    while True:
         tt.listen()
