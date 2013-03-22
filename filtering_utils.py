@@ -10,11 +10,11 @@ from world_params import SAMPLE_RATE_HERTZ
 from world_params import DART_FREQ_HERTZ
 
 
-BUFFER_SIZE = 512
+BUFFER_SIZE = 2048
 
-def sine(freq, length):
-    for i in range(length):
-        yield math.sin(i * 2 * math.pi * freq / SAMPLE_RATE_HERTZ)
+def sine(freq, length=BUFFER_SIZE, offset=0):
+        return [math.sin(i * 2 * math.pi * freq / SAMPLE_RATE_HERTZ)
+                for i in range(length)]
 
 def add_signals(s1, s2, r=1):
     return [s1[i] + r * s2[i] for i in range(len(s1))]
@@ -24,7 +24,7 @@ def add_noise(signal, noise_ratio=0.4):
 
     # adding a bunch of sines with random frequency and amplitude
     for _ in range(500):
-        moar_noise = sine(random.randint(1,24000), 2 * math.pi * random.random())
+        moar_noise = sine(random.randint(1,24000), offset=2 * math.pi * random.random())
         noise = add_signals(noise, moar_noise, random.random())
 
     # adding some white noise too
@@ -140,15 +140,12 @@ def make_signal(freq, harmonic_pattern):
         signal = add_signals(signal, sine((i + 1) * freq), ratio)
     return signal
 
-harmonic_pattern = [(10 - i) / 10. for i in range(10)]
-signal = make_signal(1900, harmonic_pattern)
-
 
 def plot(signal, sig_graph, fft_graph):
     sig_graph.plot(signal[:BUFFER_SIZE/4])
     fft_graph.plot(get_spectrum(signal)[:BUFFER_SIZE/2])
 
-def draw_all():
+def draw_test():
     fig = plt.figure()
     grid = 320
     sig_graph = fig.add_subplot(grid + 1)
@@ -159,10 +156,14 @@ def draw_all():
     multifilteredfft_graph = fig.add_subplot(grid + 6)
     #filtered_graph = fig.add_subplot(grid + 5)
     #filteredfft_graph = fig.add_subplot(grid + 6)
+
+    harmonic_pattern = [(10 - i) / 10. for i in range(10)]
+    signal = make_signal(1900, harmonic_pattern)
     noisy = add_noise(signal, 0.4)
     filtered = violent_multi_band_pass(noisy, prepare_multi_band_filter([(1500, 2500)]))
     mask = make_mask_for_signal(noisy, 1000, 2500, 0.05)
     multifiltered = violent_multi_band_pass(noisy, mask)
+
     plot(signal, sig_graph, fft_graph)
     plot(noisy, noisy_graph, noisyfft_graph)
     #plot(filtered, filtered_graph, filteredfft_graph)
