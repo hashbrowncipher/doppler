@@ -5,6 +5,19 @@ has information on the type_strings being used.
 import fileinput
 import struct
 
+from world_params import CHANNEL_COUNT
+
+
+# Input is a double per channel
+ZERO_DETECTION_INPUT_FORMAT = 'd' * CHANNEL_COUNT
+# Channel id is a short, timestep is a long
+ALIGN_INPUT_FORMAT = 'H' + 'L'
+# Input one long timestep and one double distance per channel
+MULTILATERATE_INPUT_FORMAT = 'L' + 'd' * CHANNEL_COUNT
+# Display is t, x, y, z all doubles
+DISPLAY_INPUT_FORMAT = 'dddd'
+
+
 # Set True to use struct and pass messages more efficiently; False
 # uses strings separated by spaces instead.
 USE_BINARY_PACKING = False
@@ -14,6 +27,7 @@ USE_BINARY_PACKING = False
 fmt_chars_to_types = {
     'd': float,
     'H': int,
+    'L': long,
 }
 
 

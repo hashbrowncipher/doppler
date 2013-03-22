@@ -8,7 +8,7 @@ from pipe_util import join_output
 from world_params import CHANNEL_COUNT
 from world_params import SAMPLE_RATE_HERTZ
 from world_params import DART_FREQ_HERTZ
-from zero_detection import ZERO_DETECTION_INPUT_FORMAT
+from pipe_util import ZERO_DETECTION_INPUT_FORMAT
 
 
 BUFFER_SIZE = 2048

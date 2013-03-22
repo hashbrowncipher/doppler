@@ -16,7 +16,10 @@ from scipy.spatial.distance import squareform
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
+from pipe_util import MULTILATERATE_INPUT_FORMAT
+from pipe_util import DISPLAY_INPUT_FORMAT
 from world_params import CHANNEL_COUNT
+from world_params import SAMPLE_RATE_HERTZ
 from world_params import MIC_COORDS_METERS
 
 
@@ -31,8 +34,6 @@ def transpose_1D(M):
 	return M.reshape(len(M), 1)
 
 
-# Input one double time and one double distance per channel
-MULTILATERATE_INPUT_FORMAT = 'd' + 'd' * CHANNEL_COUNT
 def multilaterate(mic_positions, time__mic_dart_distances_stream):
 	"""Take a stream of mic - dart distances and yield coordinates.
 
@@ -45,9 +46,10 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 	origin = mic_positions[0]
 	mic_positions = mic_positions - origin
 
-	for time__mic_dart_distances in time__mic_dart_distances_stream:
-		time_seconds = time__mic_dart_distances[0]
-		mic_dart_distances = array(time__mic_dart_distances[1:])
+	for timestep__mic_dart_distances in time__mic_dart_distances_stream:
+		timestep = timestep__mic_dart_distances[0]
+		time_seconds = float(timestep) / float(SAMPLE_RATE_HERTZ)
+		mic_dart_distances = array(timestep__mic_dart_distances[1:])
 
 		# The algorithm fails on any 0 - m distance degeneracies. Add some
 		# wiggle if so.
@@ -70,7 +72,6 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 			sys.stderr.write('Could not multilaterate at t = %f\n' % time_seconds)
 
 
-DISPLAY_INPUT_FORMAT = 'dddd'
 if __name__ == '__main__':
 	for time_seconds, coordinates in multilaterate(MIC_COORDS_METERS, split_fileinput(MULTILATERATE_INPUT_FORMAT)):
 		join_output(DISPLAY_INPUT_FORMAT, time_seconds, *coordinates)

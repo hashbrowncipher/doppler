@@ -4,13 +4,13 @@ from numpy import logical_xor
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
+from pipe_util import ZERO_DETECTION_INPUT_FORMAT
+from pipe_util import ALIGN_INPUT_FORMAT
 from world_params import CHANNEL_COUNT
 from world_params import SAMPLE_RATE_HERTZ
 from alignment import ALIGN_INPUT_FORMAT
 
 
-# Input is a double per channel
-ZERO_DETECTION_INPUT_FORMAT = 'd' * CHANNEL_COUNT
 def zero_detection(sample_stream):
 	"""Make events for 0-crossings.
 
@@ -25,7 +25,7 @@ def zero_detection(sample_stream):
 			sign_changes = logical_xor(last_samples_sign, samples_sign)
 			for channel, sign_change in enumerate(sign_changes):
 				if sign_change:
-					yield channel, float(timestep) / float(SAMPLE_RATE_HERTZ)
+					yield channel, timestep
 		last_samples_sign = samples_sign
 
 
