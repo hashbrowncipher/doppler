@@ -43,7 +43,7 @@ def freq_from_index(index):
 # noisy = add_noise(signal)
 
 def index_from_freq(freq):
-    return int(freq * BUFFER_SIZE / SAMPLE_RATE)
+    return int(freq * BUFFER_SIZE / SAMPLE_RATE_HERTZ)
 
 def fft(signal):
     return scipy.fft(signal).tolist()
@@ -61,7 +61,8 @@ def prepare_multi_band_filter(freq_ranges, size=BUFFER_SIZE):
     for (low, high) in freq_ranges:
         low = index_from_freq(low)
         high = index_from_freq(high)
-        mask = mask[:low] + [1] * (high - low) + mask[high:]
+        for i in xrange(low-1, high):
+            mask[i] = 1
     return mask
 
 def violent_multi_band_pass(signal, mask):
