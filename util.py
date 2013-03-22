@@ -181,5 +181,5 @@ def draw_signal(signal):
 
 if __name__ == '__main__':
     for timestep, value in enumerate(sine(DART_FREQ_HERTZ, 10000)):
-		# one double per channel
+        # one double per channel
         join_output('%dd' % CHANNELS, [value] * CHANNELS)
