@@ -4,7 +4,7 @@ from numpy import array
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
-from world_params import CHANNELS
+from world_params import CHANNEL_COUNT
 from world_params import SPEED_OF_SOUND_METERS_SECOND
 
 
@@ -17,7 +17,7 @@ def align(event_stream):
 	event_stream must be a generator of (channel int, time float).
 	Yields time + 8-tuples of distances.
 	"""
-	queues = tuple(deque() for i in range(CHANNELS))
+	queues = tuple(deque() for i in range(CHANNEL_COUNT))
 
 	for channel, event_t in event_stream:
 		# In on the right.

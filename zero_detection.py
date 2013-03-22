@@ -3,14 +3,14 @@ from numpy import logical_xor
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
-from world_params import CHANNELS
+from world_params import CHANNEL_COUNT
 from world_params import SAMPLE_RATE_HERTZ
 
 
 def zero_detection(sample_stream):
 	"""Make events for 0-crossings.
 
-	sample_stream must be a generator of CHANNELS-tuples of values that
+	sample_stream must be a generator of CHANNEL_COUNT-tuples of values that
 		represent the current microphone level.
 	Yields channel ID, time tuples.
 	"""
@@ -26,5 +26,5 @@ def zero_detection(sample_stream):
 
 
 if __name__ == '__main__':
-	for channel_event_t in zero_detection(split_fileinput([float] * CHANNELS)):
+	for channel_event_t in zero_detection(split_fileinput([float] * CHANNEL_COUNT)):
 		join_output(channel_event_t)

@@ -16,13 +16,13 @@ from scipy.spatial.distance import squareform
 
 from pipe_util import split_fileinput
 from pipe_util import join_output
-from world_params import CHANNELS
-from world_params import MIC_COORDS
+from world_params import CHANNEL_COUNT
+from world_params import MIC_COORDS_METERS
 
 
-FAKE_DART = array([1.5, 2, 0.5])
+FAKE_DART_METERS = array([1.5, 2, 0.5])
 
-MIC_DART_DISTANCES = array([euclidean(mic, FAKE_DART) for mic in MIC_COORDS])
+MIC_DART_DISTANCES_METERS = array([euclidean(mic, FAKE_DART_METERS) for mic in MIC_COORDS_METERS])
 
 
 def transpose_1D(M):
@@ -68,5 +68,5 @@ def multilaterate(mic_positions, time__mic_dart_distances_stream):
 
 
 if __name__ == '__main__':
-	for time, coordinates in multilaterate(MIC_COORDS, split_fileinput([float] + [float] * CHANNELS)):
+	for time, coordinates in multilaterate(MIC_COORDS_METERS, split_fileinput([float] + [float] * CHANNEL_COUNT)):
 		join_output([time] + list(coordinates))

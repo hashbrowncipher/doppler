@@ -3,11 +3,11 @@ from scipy.spatial.distance import pdist
 
 
 SAMPLE_RATE_HERTZ = 48000
-CHANNELS = 8
+CHANNEL_COUNT = 8
 SPEED_OF_SOUND_METERS_SECOND = 340.29
 DART_FREQ_HERTZ = 2000.0
 
-MIC_COORDS = array([
+MIC_COORDS_METERS = array([
 	[0.0, 0.0, 0.0],
 	[1.0, 0.0, 0.0],
 	[0.0, 1.0, 0.0],
@@ -20,6 +20,6 @@ MIC_COORDS = array([
 
 # Figure out a threshold for the maximum difference in delays we should
 # observe.
-MIC_MIC_DISTANCES = pdist(MIC_COORDS, 'euclidean')
+MIC_MIC_DISTANCES_METERS = pdist(MIC_COORDS_METERS, 'euclidean')
 DELAY_FUDGE_FACTOR = 1.1
-MAX_MIC_DELAY_SECONDS = max(MIC_MIC_DISTANCES) / SPEED_OF_SOUND_METERS_SECOND * DELAY_FUDGE_FACTOR
+MAX_MIC_DELAY_SECONDS = max(MIC_MIC_DISTANCES_METERS) / SPEED_OF_SOUND_METERS_SECOND * DELAY_FUDGE_FACTOR

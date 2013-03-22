@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import random
 
 from pipe_util import join_output
-from world_params import CHANNELS
+from world_params import CHANNEL_COUNT
 from world_params import SAMPLE_RATE_HERTZ
 from world_params import DART_FREQ_HERTZ
 
@@ -176,4 +176,4 @@ def draw_all():
 
 if __name__ == '__main__':
     for timestep, value in enumerate(sine(DART_FREQ_HERTZ)):
-        join_output([value] * CHANNELS)
+        join_output([value] * CHANNEL_COUNT)
