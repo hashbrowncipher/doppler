@@ -86,4 +86,4 @@ def align(channel__event_timestep_stream, allow_dropped_events=False):
 
 if __name__ == '__main__':
 	for timestep, aligned_distances in align(split_fileinput(ALIGN_INPUT_FORMAT)):
-		join_output(MULTILATERATE_INPUT_FORMAT, timestep, *aligned_distances)
+		join_output(MULTILATERATE_INPUT_FORMAT, [timestep] + aligned_distances)

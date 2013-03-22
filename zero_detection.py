@@ -42,4 +42,4 @@ def zero_detection(sample_stream):
 
 if __name__ == '__main__':
 	for channel, event_time_seconds in zero_detection(split_fileinput(ZERO_DETECTION_INPUT_FORMAT)):
-		join_output(ALIGN_INPUT_FORMAT, channel, event_time_seconds)
+		join_output(ALIGN_INPUT_FORMAT, (channel, event_time_seconds))

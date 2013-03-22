@@ -30,6 +30,6 @@ Detection Flow
 --------------
 
 If you have already filtered data, you can pass it through the zero-detection, event alignment, and multilateration steps via:
-`python util.py | python zero_detection.py | python alignment.py | python multilateration.py`
+`python filtering_utils.py | python zero_detection.py | python alignment.py | python multilateration.py`
 
-`python util.py` generates a sin wave.
+`python filtering_utils.py` generates a sin wave.
