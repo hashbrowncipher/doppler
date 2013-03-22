@@ -30,7 +30,7 @@ def zero_detection(sample_stream):
 			sign_changes = logical_and(samples_sign, ~last_samples_sign)
 			sign_changes = logical_and(sign_changes, samples_since_zero > 2 * WAVELENGTH_SAMPLES / 3)
 			for channel in nonzero(sign_changes)[0]:
-				yield channel, float(timestep) / float(SAMPLE_RATE_HERTZ)
+				yield channel, timestep
 	
 			samples_since_zero[sign_changes] = 0
 			samples_since_zero[~sign_changes] += 1
